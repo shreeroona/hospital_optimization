@@ -1,45 +1,22 @@
-from flask import Flask, request
+from flask import Flask, render_template,request
+import streamlit as st
+
 import numpy as np
 import pandas as pd
 import pickle
-from flasgger import Swagger
-import sklearn
 
-
-app = Flask(__name__)
-Swagger(app)
+from streamlit.state.widgets import NoValue
 
 pickled_model = open("Pickle_file_ho.pkl","rb")
 model = pickle.load(pickled_model)
 
-@app.route("/")
-def home():
-    return "Welcome to Hosptial Optimization App"
-@app.route('/predict')
+def forecast():
+    st.title("Hospital Optimization App")
+    days = st.number_input("Days for forecast",value=1)
+    netamount = model.forecast(days).sum()
+    result = ""
+    if st.button("Show Result"):
+        st.success(f"The forecast of net bill ammount for next {days} days is {netamount}")
 
-
-
-def forecast_netamount():
-
-    """ Forecast the Hospital billing
-    ---
-
-    parameters:
-     - name: days
-       in: query
-       type: number
-       required: true
-    responses:
-       200:
-            
-            description: Result is
-    """
-    days = request.args.get("days",type = int)
-    forecast = model.forecast(days)
-    return f"The forecast is {forecast}"
-
-
-
-if __name__ == "__main__":
-    
-    app.run()
+if __name__ =="__main__":
+    forecast()
